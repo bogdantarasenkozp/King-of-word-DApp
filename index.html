@@ -44,7 +44,9 @@
                 about: "About",
                 about_title: " - is a DApp based on Nebulas blockchain where you can own the word and sell it with x2 profit.The length of the word should be no longer then 100 characters.Initial price starts from 0.1 NAS.",
                 about_sub_title: "(For example: you own the word for 1 NAS and then the price of the word become 2 NAS , and if someone want to store his word or phrase on this DApp he should pay 2 NAS, and you will get back 2 NAS)",
-                got_it: "Got it"
+                got_it: "Got it",
+                purchase_title: "The word was purchased",
+                purchase_sub_title: "times"
             },
             中文: {
                 loading: "装载",
@@ -59,7 +61,9 @@
                 about: "关于",
                 about_title: "- 是一个基于星云区块链的DApp，您可以拥有这个词，并以x2 profit的形式出售它。单词的长度不应超过100个字符。初始价格从0.1 NAS开始。",
                 about_sub_title: "（例如：你拥有1个NAS的单词，然后单词的价格变成2个NAS，如果有人想在这个DApp上存储他的单词或短语，他应该支付2个NAS，并且你将收回2个NAS）",
-                got_it: "得到它了"
+                got_it: "得到它了",
+                purchase_title: "这个词被购买",
+                purchase_sub_title: "次"
             }
         };
 
@@ -67,21 +71,22 @@
             constructor(props) {
                 super(props);
                 this.state = {
-                price: 0,
-                text: "",
-                owner: "",
-                error: "",
-                lang: "ENG",
-                edit: false,
-                loading: true,
-                showModal: false,
-                charsLeft: 100,
-                updateTimer: 15
+                    price: 0,
+                    text: "",
+                    owner: "",
+                    error: "",
+                    lang: "ENG",
+                    edit: false,
+                    loading: true,
+                    showModal: false,
+                    charsLeft: 100,
+                    updateTimer: 15
                 }
                 this.getContent = this.getContent.bind(this);
                 this.setContent = this.setContent.bind(this);
                 this.saveContent = this.saveContent.bind(this);
                 this.setUpdateTimer = this.setUpdateTimer.bind(this);
+                this.countPurchases = this.countPurchases.bind(this);
             }
             componentDidMount() {
                 this.getContent();
@@ -105,18 +110,20 @@
                 const callFunction = "get";
                 const callArgs = "";
                 nebPay.simulateCall(dappAddress, value, callFunction, callArgs, {
-                listener: this.setContent,
+                    listener: this.setContent,
                 });
             }
             setContent(responce) {
                 if(!responce.result) return;
-                var result = eval(JSON.parse(responce.result));
+                    var result = eval(JSON.parse(responce.result));
                 if(responce.execute_err.length > 0) {
-                this.setState({error: responce.execute_err});
+                    this.setState({error: responce.execute_err});
                 }
                 if(result !== 'null') {
-                const {text, owner, price} = result;
-                this.setState({text, owner, price: price/1000000000000000000, loading: false});
+                    const {text, owner, price} = result;
+                    const {purchases} = this.state;
+                    let wordPrice = price/1000000000000000000;
+                    this.setState({text, owner, price: wordPrice, loading: false});
                 }
             }
             saveContent() {
@@ -124,16 +131,16 @@
                 const callFunction = "save";
                 const callArgs = `[0, "${text}"]`;
                 nebPay.call(dappAddress, price, callFunction, callArgs, {
-                qrcode: {
-                    showQRCode: false
-                },
-                listener: this.setContent,
+                    qrcode: {
+                        showQRCode: false
+                    },
+                    listener: this.setContent,
                 });
             }
             toggleEdit() {
                 const {edit} = this.state;
                 if(edit) {
-                this.saveContent();
+                    this.saveContent();
                 }
                 this.setState({edit: !edit});
             }
@@ -151,7 +158,18 @@
                 const maxChar = this.state.charsLeft;
                 const charLength = 100 - text.length;
                 if(charLength >= 0) {
-                this.setState({ charsLeft: charLength, text: text });
+                    this.setState({ charsLeft: charLength, text: text });
+                }
+            }
+            countPurchases(price, purchases) {
+                if(price >= 0.1) {
+                    if(parseInt(price/2) === 0) {
+                        return this.countPurchases(price/2, purchases + 1);
+                    } else {
+                        return purchases;
+                    } 
+                } else {
+                    return purchases;
                 }
             }
             render() {
@@ -159,74 +177,76 @@
                 const icon = edit ? saveIcon : editIcon;
                 const {updateTimer} = this.state;
                 const strings = languages[lang];
+                const countPurchases = this.countPurchases(price/2, 0);
                 return (
-                <div className={classNames({ "showAlertBoard": showModal })}>
-                    {loading ? (
-                    <div className="preloader">
-                        <div className="lines">
-                        <div className="line line-1"></div>
-                        <div className="line line-2"></div>
-                        <div className="line line-3"></div>
-                        </div>
-                        <div className="loading-text">{strings.loading}</div>
-                    </div>
-                    ) : (
-                    <div>
-                        <header className="main-header">
-                            <h1>
-                                {strings.first_name}
-                                <span className="last-name">
-                                    <img className={classNames({"chinese-offset": lang === "中文"})} src="./images/logo.png"/>
-                                    {strings.last_name}
-                                </span>
-                            </h1>
-                            <h2>{strings.sub_title}</h2>
-                        </header>
-                        <section className="app-insert">
-                            {edit ? (
-                                <input type="text" name="task" placeholder="Write your text here" onChange={this.handleWordCount} value={text} />
-                            ) : (
-                                <span className="title">{text}</span>
+                    <div className={classNames({ "showAlertBoard": showModal })}>
+                        {loading ? (
+                            <div className="preloader">
+                                <div className="lines">
+                                <div className="line line-1"></div>
+                                <div className="line line-2"></div>
+                                <div className="line line-3"></div>
+                                </div>
+                                <div className="loading-text">{strings.loading}</div>
+                            </div>
+                        ) : (
+                        <div>
+                            <header className="main-header">
+                                <h1>
+                                    {strings.first_name}
+                                    <span className="last-name">
+                                        <img className={classNames({"chinese-offset": lang === "中文"})} src="./images/logo.png"/>
+                                        {strings.last_name}
+                                    </span>
+                                </h1>
+                                <h2>{strings.sub_title}</h2>
+                            </header>
+                            <section className="app-insert">
+                                {edit ? (
+                                    <input type="text" name="task" placeholder="Write your text here" onChange={this.handleWordCount} value={text} />
+                                ) : (
+                                    <span className="title">{text}</span>
+                                )}
+                                <img className="icon" src={icon} onClick={this.toggleEdit.bind(this)}/>
+                            </section>
+                            {edit && 
+                                <p className="price-title letter-count">{charsLeft} {strings.character_left}</p>
+                            }
+                            {error.lengtht > 0 && 
+                                <p className="price-title error">{error}</p>
+                            }
+                            <div className="price-wrapper">
+                                <span className="price-title">{strings.previous_price}:&nbsp; <span className="text-crossed">{price/2}&nbsp; NAS</span></span>
+                                <span className="price-title">{strings.current_price}:&nbsp; <span className="bold">{price}&nbsp; NAS</span></span>
+                            </div>
+                            <p className="price-title owner">{strings.owner}:&nbsp; <span className="bold">{owner}</span></p>
+                            <p className="price-title owner">{strings.purchase_title} {countPurchases} {strings.purchase_sub_title}</p>
+                            <footer className="main-footer">
+                                <ul>
+                                    <li><a href="#" onClick={this.toggleModal.bind(this)}>{strings.about}</a></li>
+                                    <li><a href="https://github.com/bogdantarasenkozp/kingOfword" target="_blank">GitHub</a></li>
+                                    <li><a href="" target="_blank">DAppBoard</a></li>
+                                    <li><a href="#" onClick={this.toggleLanguage.bind(this)}>{lang === "ENG" ? "中文" : "ENG"}</a></li>
+                                </ul>
+                                <p className="counter">{strings.reload} {updateTimer}</p>
+                            </footer>
+                            {showModal && (
+                            <div className="Alert showAlert" style={{display: "flex", opacity: 1, marginTop: "-255px",animation: "showAlertBoard 0.5s"}}>
+                                <div className="Alert-content fs-22">{strings.about}</div>
+                                <div className="Alert-content">
+                                    <p><span className="bold">{strings.first_name}{strings.last_name}</span> {strings.about_title}</p>
+                                    <p className="sub-content">{strings.about_sub_title}</p> 
+                                </div>
+                                <div className="Alert-btn-container">
+                                    <button className="confirm" style={{display: "inline-block"}} onClick={this.toggleModal.bind(this)}>
+                                        {strings.got_it}
+                                    </button>
+                                </div>
+                            </div>
                             )}
-                            <img className="icon" src={icon} onClick={this.toggleEdit.bind(this)}/>
-                        </section>
-                        {edit && 
-                            <p className="price-title letter-count">{charsLeft} {strings.character_left}</p>
-                        }
-                        {error.lengtht > 0 && 
-                            <p className="price-title error">{error}</p>
-                        }
-                        <div className="price-wrapper">
-                            <span className="price-title">{strings.previous_price}:&nbsp; <span className="text-crossed">{price/2}&nbsp; NAS</span></span>
-                            <span className="price-title">{strings.current_price}:&nbsp; <span className="bold">{price}&nbsp; NAS</span></span>
-                        </div>
-                        <p className="price-title owner">{strings.owner}:&nbsp; <span className="bold">{owner}</span></p>
-                        <footer className="main-footer">
-                            <ul>
-                                <li><a href="#" onClick={this.toggleModal.bind(this)}>{strings.about}</a></li>
-                                <li><a href="https://github.com/bogdantarasenkozp/kingOfword" target="_blank">GitHub</a></li>
-                                <li><a href="" target="_blank">DAppBoard</a></li>
-                                <li><a href="#" onClick={this.toggleLanguage.bind(this)}>{lang === "ENG" ? "中文" : "ENG"}</a></li>
-                            </ul>
-                            <p className="counter">{strings.reload} {updateTimer}</p>
-                        </footer>
-                        {showModal && (
-                        <div className="Alert showAlert" style={{display: "flex", opacity: 1, marginTop: "-255px",animation: "showAlertBoard 0.5s"}}>
-                            <div className="Alert-content fs-22">{strings.about}</div>
-                            <div className="Alert-content">
-                                <p><span className="bold">{strings.first_name}{strings.last_name}</span> {strings.about_title}</p>
-                                <p className="sub-content">{strings.about_sub_title}</p> 
-                            </div>
-                            <div className="Alert-btn-container">
-                                <button className="confirm" style={{display: "inline-block"}} onClick={this.toggleModal.bind(this)}>
-                                    {strings.got_it}
-                                </button>
-                            </div>
                         </div>
                         )}
                     </div>
-                    )}
-                </div>
                 );
             }
         }
