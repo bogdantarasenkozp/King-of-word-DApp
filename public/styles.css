@@ -1,4 +1,4 @@
-html, body, #root, #root>div {
+  html, body, #root, #root>div {
     height: 100%;
     overflow: hidden;
   }
@@ -108,7 +108,7 @@ html, body, #root, #root>div {
   }
   header h1 {
       font-size: 64px;
-      font-weight: 300;
+      font-weight: 400;
       margin: 80px 0 25px;
       color: #7f8c8d;
   }
@@ -493,7 +493,19 @@ html, body, #root, #root>div {
   .showAlertBoard .counter,h2 {
     display: none;
   }
-  
+  .last-name {
+    color: #000;
+    position: relative;
+    right: 25px;
+  }
+  .last-name img {
+    position: relative;
+    top: 15px;
+    left: 10px;
+  }
+  .chinese-offset {
+    left: 26px!important;
+  }
   @-moz-keyframes showAlertBoard {
     0% {
       display: none;
@@ -821,4 +833,16 @@ html, body, #root, #root>div {
       left: 1%;
       right: 1%;
     }
+    .last-name {
+        right: 5px;
+    }
+    .last-name img {
+        position: relative;
+        top: 4px;
+        left: 2px;
+        width: 38px;
+    }
+    .chinese-offset {
+        left: 8px!important;
+      }
   }

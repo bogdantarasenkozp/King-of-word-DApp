@@ -31,10 +31,10 @@
         const editIcon = "./images/edit.svg";
 
         let languages = {
-            eng: {
+            ENG: {
                 loading: "LOADING",
                 first_name: "King of ",
-                last_name: "Word",
+                last_name: "ord",
                 sub_title: "Buy words & sell them with x2 profit",
                 character_left: "characters left",
                 previous_price: "Previous price",
@@ -42,14 +42,14 @@
                 owner: "Owner",
                 reload: "Page will reloads in",
                 about: "About",
-                about_title: " - is a DApp based on Nebulas blockchain where you can own the word and sell it with x2 profit.The length of the word should be no longer then 100 characters.",
+                about_title: " - is a DApp based on Nebulas blockchain where you can own the word and sell it with x2 profit.The length of the word should be no longer then 100 characters.Initial price starts from 0.1 NAS.",
                 about_sub_title: "(For example: you own the word for 1 NAS and then the price of the word become 2 NAS , and if someone want to store his word or phrase on this DApp he should pay 2 NAS, and you will get back 2 NAS)",
                 got_it: "Got it"
             },
             中文: {
                 loading: "装载",
-                first_name: "的王者",
-                last_name: " 字",
+                first_name: "的王者 ",
+                last_name: " ord",
                 sub_title: "购买单词并以x2利润销售它们",
                 character_left: "剩余字符",
                 previous_price: "以前的价格",
@@ -57,7 +57,7 @@
                 owner: "所有者",
                 reload: "页面将重新加载",
                 about: "关于",
-                about_title: "- 是一个基于星云区块链的DApp，您可以拥有这个词，并以x2 profit的形式出售它。单词的长度不应超过100个字符。",
+                about_title: "- 是一个基于星云区块链的DApp，您可以拥有这个词，并以x2 profit的形式出售它。单词的长度不应超过100个字符。初始价格从0.1 NAS开始。",
                 about_sub_title: "（例如：你拥有1个NAS的单词，然后单词的价格变成2个NAS，如果有人想在这个DApp上存储他的单词或短语，他应该支付2个NAS，并且你将收回2个NAS）",
                 got_it: "得到它了"
             }
@@ -71,7 +71,7 @@
                 text: "",
                 owner: "",
                 error: "",
-                lang: "eng",
+                lang: "ENG",
                 edit: false,
                 loading: true,
                 showModal: false,
@@ -143,8 +143,7 @@
             }
             toggleLanguage() {
                 const {lang} = this.state;
-                let language = lang === "eng" ? "中文" : "eng";
-                strings.setLanguage(language)
+                let language = lang === "ENG" ? "中文" : "ENG";
                 this.setState({lang: language});
             }
             handleWordCount = event => {
@@ -174,8 +173,14 @@
                     ) : (
                     <div>
                         <header className="main-header">
-                        <h1>{strings.first_name}<span>{strings.last_name}</span></h1>
-                        <h2>{strings.sub_title}</h2>
+                            <h1>
+                                {strings.first_name}
+                                <span className="last-name">
+                                    <img className={classNames({"chinese-offset": lang === "中文"})} src="./images/logo.png"/>
+                                    {strings.last_name}
+                                </span>
+                            </h1>
+                            <h2>{strings.sub_title}</h2>
                         </header>
 
                         <section className="app-insert">
@@ -203,7 +208,7 @@
                             <li><a href="#" onClick={this.toggleModal.bind(this)}>{strings.about}</a></li>
                             <li><a href="" target="_blank">GitHub</a></li>
                             <li><a href="" target="_blank">DAppBoard</a></li>
-                            <li><a href="#" onClick={this.toggleLanguage.bind(this)}>{lang === "eng" ? "中文" : "eng"}</a></li>
+                            <li><a href="#" onClick={this.toggleLanguage.bind(this)}>{lang === "ENG" ? "中文" : "ENG"}</a></li>
                         </ul>
                         <p className="counter">{strings.reload} {updateTimer}</p>
                         </footer>
