@@ -1,0 +1,19 @@
+{
+  "name": "king_of_words_2",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "babel-standalone": "^6.26.0",
+    "classnames": "^2.2.5",
+    "nebpay": "0.0.6",
+    "nebpay.js": "^0.1.0",
+    "react": "^16.4.0",
+    "react-dom": "^16.4.0",
+  }
+}

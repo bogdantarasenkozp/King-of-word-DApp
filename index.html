@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="theme-color" content="#000000">
+
+    <link rel="manifest" href="./public/manifest.json">
+    <link rel="shortcut icon" href="./public/favicon.ico">
+    <link rel="stylesheet" href="./public/styles.css">
+    <title>King of Word</title>
+    
+    <script src="./node_modules/classnames/index.js"></script>
+    <!-- <script src="./node_modules/react/index.js"></script>
+    <script src="./node_modules/react-dom/index.js"></script> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.4.2/react.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.4.2/react-dom.js"></script>
+    <script src="./node_modules/nebpay.js/dist/nebPay.js"></script>
+    <script src="./node_modules/babel-standalone/babel.min.js"></script>
+  </head>
+  <body>
+    <noscript>
+      You need to enable JavaScript to run this app.
+    </noscript>
+    <div id="root"></div>
+    <script type="text/babel">
+        const NebPay = require("nebpay");
+        const nebPay = new NebPay();
+        const dappAddress = "n1ffG51euYtTJZDQNCGWYCZCx29A2jwzx8S";
+        const saveIcon = "./images/save.svg" 
+        const editIcon = "./images/edit.svg";
+
+        let languages = {
+            eng: {
+                loading: "LOADING",
+                first_name: "King of ",
+                last_name: "Word",
+                sub_title: "Buy words & sell them with x2 profit",
+                character_left: "characters left",
+                previous_price: "Previous price",
+                current_price: "Current price",
+                owner: "Owner",
+                reload: "Page will reloads in",
+                about: "About",
+                about_title: " - is a DApp based on Nebulas blockchain where you can own the word and sell it with x2 profit.The length of the word should be no longer then 100 characters.",
+                about_sub_title: "(For example: you own the word for 1 NAS and then the price of the word become 2 NAS , and if someone want to store his word or phrase on this DApp he should pay 2 NAS, and you will get back 2 NAS)",
+                got_it: "Got it"
+            },
+            中文: {
+                loading: "装载",
+                first_name: "的王者",
+                last_name: " 字",
+                sub_title: "购买单词并以x2利润销售它们",
+                character_left: "剩余字符",
+                previous_price: "以前的价格",
+                current_price: "时价",
+                owner: "所有者",
+                reload: "页面将重新加载",
+                about: "关于",
+                about_title: "- 是一个基于星云区块链的DApp，您可以拥有这个词，并以x2 profit的形式出售它。单词的长度不应超过100个字符。",
+                about_sub_title: "（例如：你拥有1个NAS的单词，然后单词的价格变成2个NAS，如果有人想在这个DApp上存储他的单词或短语，他应该支付2个NAS，并且你将收回2个NAS）",
+                got_it: "得到它了"
+            }
+        };
+
+        class App extends React.Component {
+            constructor(props) {
+                super(props);
+                this.state = {
+                price: 0,
+                text: "",
+                owner: "",
+                error: "",
+                lang: "eng",
+                edit: false,
+                loading: true,
+                showModal: false,
+                charsLeft: 100,
+                updateTimer: 15
+                }
+                this.getContent = this.getContent.bind(this);
+                this.setContent = this.setContent.bind(this);
+                this.saveContent = this.saveContent.bind(this);
+                this.setUpdateTimer = this.setUpdateTimer.bind(this);
+            }
+            componentDidMount() {
+                this.getContent();
+                this.setUpdateTimer = setInterval(this.setUpdateTimer, 1000);
+            }
+            componentWillUnmount() {
+                clearInterval(this.setUpdateTimer);
+            }
+            setUpdateTimer() {
+                let {updateTimer,edit} = this.state;
+                if(updateTimer === 0 && !edit) {
+                    this.getContent();
+                }
+                if(updateTimer === 0) {
+                    updateTimer = 15;
+                }
+                this.setState({ updateTimer: updateTimer -1 });
+            }
+            getContent() {
+                const value = 0;
+                const callFunction = "get";
+                const callArgs = "";
+                nebPay.simulateCall(dappAddress, value, callFunction, callArgs, {
+                listener: this.setContent,
+                });
+            }
+            setContent(responce) {
+                if(!responce.result) return;
+                var result = eval(JSON.parse(responce.result));
+                if(responce.execute_err.length > 0) {
+                this.setState({error: responce.execute_err});
+                }
+                if(result !== 'null') {
+                const {text, owner, price} = result;
+                this.setState({text, owner, price: price/1000000000000000000, loading: false});
+                }
+            }
+            saveContent() {
+                const {price, text} = this.state;
+                const callFunction = "save";
+                const callArgs = `[0, "${text}"]`;
+                nebPay.call(dappAddress, price, callFunction, callArgs, {
+                qrcode: {
+                    showQRCode: false
+                },
+                listener: this.setContent,
+                });
+            }
+            toggleEdit() {
+                const {edit} = this.state;
+                if(edit) {
+                this.saveContent();
+                }
+                this.setState({edit: !edit});
+            }
+            toggleModal() {
+                const {showModal} = this.state;
+                this.setState({showModal: !showModal});
+            }
+            toggleLanguage() {
+                const {lang} = this.state;
+                let language = lang === "eng" ? "中文" : "eng";
+                strings.setLanguage(language)
+                this.setState({lang: language});
+            }
+            handleWordCount = event => {
+                const text = event.target.value;
+                const maxChar = this.state.charsLeft;
+                const charLength = 100 - text.length;
+                if(charLength >= 0) {
+                this.setState({ charsLeft: charLength, text: text });
+                }
+            }
+            render() {
+                const {text, edit, price, charsLeft, owner, loading, error, lang, showModal} = this.state;
+                const icon = edit ? saveIcon : editIcon;
+                const {updateTimer} = this.state;
+                const strings = languages[lang];
+                return (
+                <div className={classNames({ "showAlertBoard": showModal })}>
+                    {loading ? (
+                    <div className="preloader">
+                        <div className="lines">
+                        <div className="line line-1"></div>
+                        <div className="line line-2"></div>
+                        <div className="line line-3"></div>
+                        </div>
+                        <div className="loading-text">{strings.loading}</div>
+                    </div>
+                    ) : (
+                    <div>
+                        <header className="main-header">
+                        <h1>{strings.first_name}<span>{strings.last_name}</span></h1>
+                        <h2>{strings.sub_title}</h2>
+                        </header>
+
+                        <section className="app-insert">
+                        {edit ? (
+                            <input type="text" name="task" placeholder="Write your text here" onChange={this.handleWordCount} value={text} />
+                        ) : (
+                            <span className="title">{text}</span>
+                        )}
+                        <img className="icon" src={icon} onClick={this.toggleEdit.bind(this)}/>
+                        </section>
+                        {edit && 
+                        <p className="price-title letter-count">{charsLeft} {strings.character_left}</p>
+                        }
+                        {error.lengtht > 0 && 
+                        <p className="price-title error">{error}</p>
+                        }
+                        <div className="price-wrapper">
+                        <span className="price-title">{strings.previous_price}:&nbsp; <span className="text-crossed">{price/2}&nbsp; NAS</span></span>
+                        <span className="price-title">{strings.current_price}:&nbsp; <span className="bold">{price}&nbsp; NAS</span></span>
+                        </div>
+                        <p className="price-title owner">{strings.owner}:&nbsp; <span className="bold">{owner}</span></p>
+
+                        <footer className="main-footer">
+                        <ul>
+                            <li><a href="#" onClick={this.toggleModal.bind(this)}>{strings.about}</a></li>
+                            <li><a href="" target="_blank">GitHub</a></li>
+                            <li><a href="" target="_blank">DAppBoard</a></li>
+                            <li><a href="#" onClick={this.toggleLanguage.bind(this)}>{lang === "eng" ? "中文" : "eng"}</a></li>
+                        </ul>
+                        <p className="counter">{strings.reload} {updateTimer}</p>
+                        </footer>
+
+                        {showModal && (
+                        <div className="Alert showAlert" style={{display: "flex", opacity: 1, marginTop: "-255px",animation: "showAlertBoard 0.5s"}}>
+                            <div className="Alert-content fs-22">{strings.about}</div>
+                            <div className="Alert-content">
+                            <p><span className="bold">{strings.first_name}{strings.last_name}</span> {strings.about_title}</p>
+                            <p className="sub-content">{strings.about_sub_title}</p> 
+                            </div>
+                            <div className="Alert-btn-container">
+                            <button className="confirm" style={{display: "inline-block"}} onClick={this.toggleModal.bind(this)}>
+                                {strings.got_it}
+                            </button>
+                            </div>
+                        </div>
+                        )}
+                    </div>
+                    )}
+                </div>
+                );
+            }
+        }
+        ReactDOM.render(
+            <App />,
+            document.getElementById('root')
+        );
+    </script>
+  </body>
+</html>
