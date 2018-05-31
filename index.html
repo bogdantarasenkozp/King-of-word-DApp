@@ -182,48 +182,45 @@
                             </h1>
                             <h2>{strings.sub_title}</h2>
                         </header>
-
                         <section className="app-insert">
-                        {edit ? (
-                            <input type="text" name="task" placeholder="Write your text here" onChange={this.handleWordCount} value={text} />
-                        ) : (
-                            <span className="title">{text}</span>
-                        )}
-                        <img className="icon" src={icon} onClick={this.toggleEdit.bind(this)}/>
+                            {edit ? (
+                                <input type="text" name="task" placeholder="Write your text here" onChange={this.handleWordCount} value={text} />
+                            ) : (
+                                <span className="title">{text}</span>
+                            )}
+                            <img className="icon" src={icon} onClick={this.toggleEdit.bind(this)}/>
                         </section>
                         {edit && 
-                        <p className="price-title letter-count">{charsLeft} {strings.character_left}</p>
+                            <p className="price-title letter-count">{charsLeft} {strings.character_left}</p>
                         }
                         {error.lengtht > 0 && 
-                        <p className="price-title error">{error}</p>
+                            <p className="price-title error">{error}</p>
                         }
                         <div className="price-wrapper">
-                        <span className="price-title">{strings.previous_price}:&nbsp; <span className="text-crossed">{price/2}&nbsp; NAS</span></span>
-                        <span className="price-title">{strings.current_price}:&nbsp; <span className="bold">{price}&nbsp; NAS</span></span>
+                            <span className="price-title">{strings.previous_price}:&nbsp; <span className="text-crossed">{price/2}&nbsp; NAS</span></span>
+                            <span className="price-title">{strings.current_price}:&nbsp; <span className="bold">{price}&nbsp; NAS</span></span>
                         </div>
                         <p className="price-title owner">{strings.owner}:&nbsp; <span className="bold">{owner}</span></p>
-
                         <footer className="main-footer">
-                        <ul>
-                            <li><a href="#" onClick={this.toggleModal.bind(this)}>{strings.about}</a></li>
-                            <li><a href="" target="_blank">GitHub</a></li>
-                            <li><a href="" target="_blank">DAppBoard</a></li>
-                            <li><a href="#" onClick={this.toggleLanguage.bind(this)}>{lang === "ENG" ? "中文" : "ENG"}</a></li>
-                        </ul>
-                        <p className="counter">{strings.reload} {updateTimer}</p>
+                            <ul>
+                                <li><a href="#" onClick={this.toggleModal.bind(this)}>{strings.about}</a></li>
+                                <li><a href="https://github.com/bogdantarasenkozp/kingOfword" target="_blank">GitHub</a></li>
+                                <li><a href="" target="_blank">DAppBoard</a></li>
+                                <li><a href="#" onClick={this.toggleLanguage.bind(this)}>{lang === "ENG" ? "中文" : "ENG"}</a></li>
+                            </ul>
+                            <p className="counter">{strings.reload} {updateTimer}</p>
                         </footer>
-
                         {showModal && (
                         <div className="Alert showAlert" style={{display: "flex", opacity: 1, marginTop: "-255px",animation: "showAlertBoard 0.5s"}}>
                             <div className="Alert-content fs-22">{strings.about}</div>
                             <div className="Alert-content">
-                            <p><span className="bold">{strings.first_name}{strings.last_name}</span> {strings.about_title}</p>
-                            <p className="sub-content">{strings.about_sub_title}</p> 
+                                <p><span className="bold">{strings.first_name}{strings.last_name}</span> {strings.about_title}</p>
+                                <p className="sub-content">{strings.about_sub_title}</p> 
                             </div>
                             <div className="Alert-btn-container">
-                            <button className="confirm" style={{display: "inline-block"}} onClick={this.toggleModal.bind(this)}>
-                                {strings.got_it}
-                            </button>
+                                <button className="confirm" style={{display: "inline-block"}} onClick={this.toggleModal.bind(this)}>
+                                    {strings.got_it}
+                                </button>
                             </div>
                         </div>
                         )}
